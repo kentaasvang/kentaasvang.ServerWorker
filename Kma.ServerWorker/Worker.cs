@@ -3,9 +3,9 @@ namespace Kma.ServerWorker;
 public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
-    private const string Published = "/home/kent/test_DeploymentWorker/publish";
-    private const string Versions = "/home/kent/test_DeploymentWorker/versions";
-    private const string Current = "/home/kent/test_DeploymentWorker/symlinkDir";
+    private const string Published = "";
+    private const string Versions = "";
+    private const string Current = "";
     private readonly int _delayInMilliSeconds = (int)TimeSpan.FromSeconds(5).TotalMilliseconds;
     private const string StartVersion = "1000";
 
@@ -26,21 +26,26 @@ public class Worker : BackgroundService
                 var version = GetNextVersion();
                 CreateFolder(version);
                 MovePublishedFiles(version);
-                
-                var symlink = Path.Combine(Current, "public");
-                
-                try
-                {
-                    Directory.Delete(symlink);
-                }
-                catch (DirectoryNotFoundException)
-                { }
-                
-                Directory.CreateSymbolicLink(symlink, Path.Combine(Versions, version));
+                CreateSymlink(version);
             }
             
             await Task.Delay(_delayInMilliSeconds, stoppingToken);
         }
+    }
+
+    private static void CreateSymlink(string version)
+    {
+        var symlink = Path.Combine(Current, "public");
+
+        try
+        {
+            Directory.Delete(symlink);
+        }
+        catch (DirectoryNotFoundException)
+        {
+        }
+
+        Directory.CreateSymbolicLink(symlink, Path.Combine(Versions, version));
     }
 
     private static void MovePublishedFiles(string version)
