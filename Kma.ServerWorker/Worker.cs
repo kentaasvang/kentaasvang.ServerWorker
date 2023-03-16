@@ -3,9 +3,9 @@ namespace Kma.ServerWorker;
 public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
-    // TODO: get config from app settings (IOptions)
-    private const string ListenFolder = "C:\\Users\\KentMartinÅsvang\\Repos\\ListenFolder";
+    private const string Published = "C:\\Users\\KentMartinÅsvang\\Repos\\ListenFolder";
     private const string VersionsFolder = "C:\\Users\\KentMartinÅsvang\\Repos\\VersionsFolder";
+    private readonly int _delayInMilliSeconds = TimeSpan.FromSeconds(5).Milliseconds;
 
     public Worker(ILogger<Worker> logger)
     {
@@ -18,15 +18,13 @@ public class Worker : BackgroundService
         {
             _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
-            if (IsDirectoryEmpty(ListenFolder))
+            if (IsDirectoryEmpty(Published))
             {
-                _logger.LogInformation($"{nameof(ListenFolder)} was empty.");
-                // TODO: get delay-time from appSettings
-                await Task.Delay(10000, stoppingToken);
+                _logger.LogInformation($"{nameof(Published)} was empty.");
+                await Task.Delay(_delayInMilliSeconds, stoppingToken);
                 continue;
             }
             
-            _logger.LogInformation($"Moving published files to {nameof(VersionsFolder)}");
             var newVersion = GetNewVersionNumber();
 
             try
@@ -39,7 +37,7 @@ public class Worker : BackgroundService
                 continue;
             }
 
-            foreach (var filePath in Directory.EnumerateFileSystemEntries(ListenFolder))
+            foreach (var filePath in Directory.EnumerateFileSystemEntries(Published))
             {
                 var fileName = Path.GetFileName(filePath); 
                 Directory.Move(filePath, Path.Combine(VersionsFolder, newVersion, fileName));
