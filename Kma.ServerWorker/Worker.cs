@@ -4,8 +4,9 @@ public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
     private const string Published = "C:\\Users\\KentMartinÅsvang\\Repos\\ListenFolder";
-    private const string VersionsFolder = "C:\\Users\\KentMartinÅsvang\\Repos\\VersionsFolder";
-    private readonly int _delayInMilliSeconds = TimeSpan.FromSeconds(5).Milliseconds;
+    private const string Versions = "C:\\Users\\KentMartinÅsvang\\Repos\\VersionsFolder";
+    private readonly int _delayInMilliSeconds = (int)TimeSpan.FromSeconds(5).TotalMilliseconds;
+    private const string StartVersion = "1000";
 
     public Worker(ILogger<Worker> logger)
     {
@@ -18,45 +19,41 @@ public class Worker : BackgroundService
         {
             _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
-            if (IsDirectoryEmpty(Published))
+            var newVersionIsPublished = !IsDirectoryEmpty(Published);
+            if (newVersionIsPublished)
             {
-                _logger.LogInformation($"{nameof(Published)} was empty.");
-                await Task.Delay(_delayInMilliSeconds, stoppingToken);
-                continue;
+                var version = GetNextVersion();
+                CreateFolder(version);
+                MovePublishedFiles(version);
             }
             
-            var newVersion = GetNewVersionNumber();
-
-            try
-            {
-                Directory.CreateDirectory(Path.Combine(VersionsFolder, newVersion));
-            }
-            catch (DirectoryNotFoundException)
-            {
-                _logger.LogError($"Directory at '{VersionsFolder}' Don't exist");
-                continue;
-            }
-
-            foreach (var filePath in Directory.EnumerateFileSystemEntries(Published))
-            {
-                var fileName = Path.GetFileName(filePath); 
-                Directory.Move(filePath, Path.Combine(VersionsFolder, newVersion, fileName));
-            }
+            await Task.Delay(_delayInMilliSeconds, stoppingToken);
         }
     }
 
-    private string GetNewVersionNumber()
+    private static void MovePublishedFiles(string version)
     {
-        if (IsDirectoryEmpty(VersionsFolder))
+        foreach (var file in Directory.EnumerateFileSystemEntries(Published))
         {
-            // no previous versions exist, return starting version
-            _logger.LogInformation (
-                $"{nameof(VersionsFolder)} was empty, returning start version number"
-                );
-            return "1000";
+            var name = Path.GetFileName(file);
+            Directory.Move(file, Path.Combine(Versions, version, name));
         }
-        
-        var paths = Directory.EnumerateDirectories(VersionsFolder).OrderDescending();
+    }
+
+    private static void CreateFolder(string version)
+    {
+        Directory.CreateDirectory(Path.Combine(Versions, version));
+    }
+
+    private static string GetNextVersion()
+    {
+        var noVersionExist = IsDirectoryEmpty(Versions);
+        if (noVersionExist)
+        {
+            return StartVersion;
+        }
+
+        var paths = Directory.EnumerateDirectories(Versions).OrderDescending();
         var directories = paths.Select(Path.GetFileName).ToList();
 
         var latestVersionNumber = directories.OrderDescending().FirstOrDefault()
@@ -66,7 +63,7 @@ public class Worker : BackgroundService
         return $"{newVersionNumber}";
     }
 
-    private bool IsDirectoryEmpty(string path)
+    private static bool IsDirectoryEmpty(string path)
     {
         return !Directory.EnumerateFileSystemEntries(path).Any();
     }
