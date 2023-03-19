@@ -17,14 +17,17 @@ public class Worker : BackgroundService
         {
             _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
-            // var newVersionIsPublished = !IsDirectoryEmpty(_appSettings.Published);
-            // if (newVersionIsPublished)
-            // {
-            //     var version = GetNextVersion();
-            //     CreateFolder(version);
-            //     MovePublishedFiles(version);
-            //     CreateSymlink(version);
-            // }
+            foreach (var service in _appSettings.Services)
+            {
+                var newVersionIsPublished = !IsDirectoryEmpty(service.Published);
+                if (newVersionIsPublished)
+                {
+                    var version = GetNextVersion(service.Versions);
+                    // CreateFolder(version);
+                    // MovePublishedFiles(version);
+                    // CreateSymlink(version);
+                }
+            }
 
             await Task.Delay(_appSettings.DelayInMilliSeconds, stoppingToken);
         }
@@ -66,23 +69,23 @@ public class Worker : BackgroundService
     //     Directory.CreateDirectory(Path.Combine(_appSettings.Versions, version));
     // }
 
-    // private string GetNextVersion()
-    // {
-    //     var noVersionExist = IsDirectoryEmpty(_appSettings.Versions);
-    //     if (noVersionExist)
-    //     {
-    //         return _appSettings.StartVersion;
-    //     }
-    //
-    //     var paths = Directory.EnumerateDirectories(_appSettings.Versions).OrderDescending();
-    //     var directories = paths.Select(Path.GetFileName).ToList();
-    //
-    //     var latestVersionNumber = directories.OrderDescending().FirstOrDefault()
-    //                               ?? throw new NullReferenceException("latestBuildNumber Can't be null");
-    //
-    //     var newVersionNumber = int.Parse(latestVersionNumber) + 1;
-    //     return $"{newVersionNumber}";
-    // }
+    private string GetNextVersion(string versions)
+    {
+        var noVersionExist = IsDirectoryEmpty(versions);
+        if (noVersionExist)
+        {
+            return _appSettings.StartVersion;
+        }
+    
+        var paths = Directory.EnumerateDirectories(versions).OrderDescending();
+        var directories = paths.Select(Path.GetFileName).ToList();
+    
+        var latestVersionNumber = directories.OrderDescending().FirstOrDefault()
+                                  ?? throw new NullReferenceException("latestBuildNumber Can't be null");
+    
+        var newVersionNumber = int.Parse(latestVersionNumber) + 1;
+        return $"{newVersionNumber}";
+    }
 
     private static bool IsDirectoryEmpty(string path)
     {
