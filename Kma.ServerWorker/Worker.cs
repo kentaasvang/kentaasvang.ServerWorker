@@ -17,13 +17,18 @@ public class Worker : BackgroundService
         {
             _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
-            var newVersionIsPublished = !IsDirectoryEmpty(_appSettings.Published);
-            if (newVersionIsPublished)
+            foreach (var service in _appSettings.Services)
             {
-                var version = GetNextVersion();
-                CreateFolder(version);
-                MovePublishedFiles(version);
-                CreateSymlink(version);
+                var newVersionIsPublished = !IsDirectoryEmpty(service.Published);
+                if (newVersionIsPublished)
+                {
+                    var version = GetNextVersion(service.Versions);
+                    CreateFolder(service.Versions, version);
+                    
+                    var newVersionFolder = Path.Combine(service.Versions, version);
+                    MoveAllFilesInFolder(service.Published, newVersionFolder);
+                    CreateSymlink(Path.Combine(service.Current, "public"), newVersionFolder);
+                }
             }
 
             await Task.Delay(_appSettings.DelayInMilliSeconds, stoppingToken);
@@ -37,49 +42,49 @@ public class Worker : BackgroundService
         return settings;
     }
 
-    private void CreateSymlink(string version)
+    // private void CreateSymlink(string version)
+    private void CreateSymlink(string from, string to)
     {
-        var symlink = Path.Combine(_appSettings.Current, "public");
-
         try
         {
-            Directory.Delete(symlink);
+            Directory.Delete(from);
         }
         catch (DirectoryNotFoundException)
         {
         }
-
-        Directory.CreateSymbolicLink(symlink, Path.Combine(_appSettings.Versions, version));
+    
+        Directory.CreateSymbolicLink(from, to);
     }
 
-    private void MovePublishedFiles(string version)
+    private void MoveAllFilesInFolder(string from, string to)
     {
-        foreach (var file in Directory.EnumerateFileSystemEntries(_appSettings.Published))
+        foreach (var file in Directory.EnumerateFileSystemEntries(from))
         {
             var name = Path.GetFileName(file);
-            Directory.Move(file, Path.Combine(_appSettings.Versions, version, name));
+            Directory.Move(file, Path.Combine(from, to, name));
         }
     }
-
-    private void CreateFolder(string version)
+    
+    
+    private void CreateFolder(string filePath, string name)
     {
-        Directory.CreateDirectory(Path.Combine(_appSettings.Versions, version));
+        Directory.CreateDirectory(Path.Combine(filePath, name));
     }
 
-    private string GetNextVersion()
+    private string GetNextVersion(string versions)
     {
-        var noVersionExist = IsDirectoryEmpty(_appSettings.Versions);
+        var noVersionExist = IsDirectoryEmpty(versions);
         if (noVersionExist)
         {
             return _appSettings.StartVersion;
         }
-
-        var paths = Directory.EnumerateDirectories(_appSettings.Versions).OrderDescending();
+    
+        var paths = Directory.EnumerateDirectories(versions).OrderDescending();
         var directories = paths.Select(Path.GetFileName).ToList();
-
+    
         var latestVersionNumber = directories.OrderDescending().FirstOrDefault()
                                   ?? throw new NullReferenceException("latestBuildNumber Can't be null");
-
+    
         var newVersionNumber = int.Parse(latestVersionNumber) + 1;
         return $"{newVersionNumber}";
     }
@@ -92,11 +97,16 @@ public class Worker : BackgroundService
 
 public class WorkerSettings
 {
-    public static readonly string Name = nameof(WorkerSettings);
-    
+    public const string Name = nameof(WorkerSettings);
+    public List<Service> Services { get; } = new();
+    public int DelayInMilliSeconds { get; set; } = 0;
+    public string StartVersion { get; set; } = string.Empty;
+}
+
+public class Service
+{
+    public string Name { get; set; } = string.Empty;
     public string Published { get; set; } = string.Empty;
     public string Versions { get; set; } = string.Empty;
     public string Current { get; set; } = string.Empty;
-    public int DelayInMilliSeconds { get; set; } = 0;
-    public string StartVersion { get; set; } = string.Empty;
 }
