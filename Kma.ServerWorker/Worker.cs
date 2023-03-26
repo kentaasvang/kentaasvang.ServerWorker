@@ -23,9 +23,11 @@ public class Worker : BackgroundService
                 if (newVersionIsPublished)
                 {
                     var version = GetNextVersion(service.Versions);
-                    // CreateFolder(version);
-                    // MovePublishedFiles(version);
-                    // CreateSymlink(version);
+                    CreateFolder(service.Versions, version);
+                    
+                    var newVersionFolder = Path.Combine(service.Versions, version);
+                    MoveAllFilesInFolder(service.Published, newVersionFolder);
+                    CreateSymlink(Path.Combine(service.Current, "public"), newVersionFolder);
                 }
             }
 
@@ -41,33 +43,33 @@ public class Worker : BackgroundService
     }
 
     // private void CreateSymlink(string version)
-    // {
-    //     var symlink = Path.Combine(_appSettings.Current, "public");
-    //
-    //     try
-    //     {
-    //         Directory.Delete(symlink);
-    //     }
-    //     catch (DirectoryNotFoundException)
-    //     {
-    //     }
-    //
-    //     Directory.CreateSymbolicLink(symlink, Path.Combine(_appSettings.Versions, version));
-    // }
+    private void CreateSymlink(string from, string to)
+    {
+        try
+        {
+            Directory.Delete(from);
+        }
+        catch (DirectoryNotFoundException)
+        {
+        }
+    
+        Directory.CreateSymbolicLink(from, to);
+    }
 
-    // private void MovePublishedFiles(string version)
-    // {
-    //     foreach (var file in Directory.EnumerateFileSystemEntries(_appSettings.Published))
-    //     {
-    //         var name = Path.GetFileName(file);
-    //         Directory.Move(file, Path.Combine(_appSettings.Versions, version, name));
-    //     }
-    // }
-    //
-    // private void CreateFolder(string version)
-    // {
-    //     Directory.CreateDirectory(Path.Combine(_appSettings.Versions, version));
-    // }
+    private void MoveAllFilesInFolder(string from, string to)
+    {
+        foreach (var file in Directory.EnumerateFileSystemEntries(from))
+        {
+            var name = Path.GetFileName(file);
+            Directory.Move(file, Path.Combine(from, to, name));
+        }
+    }
+    
+    
+    private void CreateFolder(string filePath, string name)
+    {
+        Directory.CreateDirectory(Path.Combine(filePath, name));
+    }
 
     private string GetNextVersion(string versions)
     {
@@ -96,7 +98,7 @@ public class Worker : BackgroundService
 public class WorkerSettings
 {
     public const string Name = nameof(WorkerSettings);
-    public List<Service> Services { get; set; } = new();
+    public List<Service> Services { get; } = new();
     public int DelayInMilliSeconds { get; set; } = 0;
     public string StartVersion { get; set; } = string.Empty;
 }
