@@ -1,13 +1,4 @@
-# 🆕 My Project
+# ServerWorker
 
-## ❓ What is My Project?
+Runs on remote server and handles versioning and deployment of web applications.
 
-## ⚡ Getting Started
-
-## 🔧 Building and Running
-
-### 🔨 Build the Project
-
-### ▶ Running and Settings
-
-## 🤝 Collaborate with My Project
