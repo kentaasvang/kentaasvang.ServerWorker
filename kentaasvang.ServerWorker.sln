@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kma.ServerWorker", "Kma.ServerWorker\Kma.ServerWorker.csproj", "{FE525F3F-913B-4111-8CA0-3AFE22985DFD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kentaasvang.ServerWorker", "kentaasvang.ServerWorker\kentaasvang.ServerWorker.csproj", "{FE525F3F-913B-4111-8CA0-3AFE22985DFD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

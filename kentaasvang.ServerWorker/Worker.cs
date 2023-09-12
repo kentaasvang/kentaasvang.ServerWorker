@@ -1,4 +1,4 @@
-namespace Kma.ServerWorker;
+namespace kentaasvang.ServerWorker;
 
 public class Worker : BackgroundService
 {

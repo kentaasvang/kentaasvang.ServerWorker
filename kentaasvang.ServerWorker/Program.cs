@@ -1,4 +1,4 @@
-using Kma.ServerWorker;
+using kentaasvang.ServerWorker;
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services => { services.AddHostedService<Worker>(); })
