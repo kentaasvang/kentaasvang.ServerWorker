@@ -5,6 +5,15 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{4EF88CC3-8B5C-4DD7-A6D1-D02BB8D231FA}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
+		.gitignore = .gitignore
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dist", "Dist", "{ED9F15C9-92BE-4019-AE97-668A3F536DBD}"
+	ProjectSection(SolutionItems) = preProject
+		dist\appsettings.Development.json = dist\appsettings.Development.json
+		dist\appsettings.json = dist\appsettings.json
+		dist\kentaasvang.ServerWorker = dist\kentaasvang.ServerWorker
+		dist\kentaasvang.ServerWorker.pdb = dist\kentaasvang.ServerWorker.pdb
 	EndProjectSection
 EndProject
 Global

@@ -3,12 +3,12 @@ namespace kentaasvang.ServerWorker;
 public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
-    private readonly WorkerSettings _appSettings;
+    private readonly WorkerSettings _settings;
 
     public Worker(ILogger<Worker> logger, IConfiguration configuration)
     {
         _logger = logger;
-        _appSettings = LoadSettings(configuration);
+        _settings = LoadSettings(configuration);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -17,7 +17,7 @@ public class Worker : BackgroundService
         {
             _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
-            foreach (var service in _appSettings.Services)
+            foreach (var service in _settings.Services)
             {
                 var newVersionIsPublished = !IsDirectoryEmpty(service.Published);
                 if (newVersionIsPublished)
@@ -31,7 +31,7 @@ public class Worker : BackgroundService
                 }
             }
 
-            await Task.Delay(_appSettings.DelayInMilliSeconds, stoppingToken);
+            await Task.Delay(_settings.DelayInMilliSeconds, stoppingToken);
         }
     }
 
@@ -42,7 +42,6 @@ public class Worker : BackgroundService
         return settings;
     }
 
-    // private void CreateSymlink(string version)
     private void CreateSymlink(string from, string to)
     {
         try
@@ -76,7 +75,7 @@ public class Worker : BackgroundService
         var noVersionExist = IsDirectoryEmpty(versions);
         if (noVersionExist)
         {
-            return _appSettings.StartVersion;
+            return _settings.StartVersion;
         }
     
         var paths = Directory.EnumerateDirectories(versions).OrderDescending();
@@ -93,20 +92,4 @@ public class Worker : BackgroundService
     {
         return !Directory.EnumerateFileSystemEntries(path).Any();
     }
-}
-
-public class WorkerSettings
-{
-    public const string Name = nameof(WorkerSettings);
-    public List<Service> Services { get; } = new();
-    public int DelayInMilliSeconds { get; set; } = 0;
-    public string StartVersion { get; set; } = string.Empty;
-}
-
-public class Service
-{
-    public string Name { get; set; } = string.Empty;
-    public string Published { get; set; } = string.Empty;
-    public string Versions { get; set; } = string.Empty;
-    public string Current { get; set; } = string.Empty;
 }
