@@ -16,18 +16,21 @@ public class Worker : BackgroundService
         while (!stoppingToken.IsCancellationRequested)
         {
             _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-
-            foreach (var service in _settings.Services)
+            
+            if (_settings.Services != null)
             {
-                var newVersionIsPublished = !IsDirectoryEmpty(service.Published);
-                if (newVersionIsPublished)
+                foreach (var service in _settings.Services)
                 {
-                    var version = GetNextVersion(service.Versions);
-                    CreateFolder(service.Versions, version);
+                    var newVersionIsPublished = !IsDirectoryEmpty(service.PublishedDirectory);
+                    if (!newVersionIsPublished) 
+                        continue;
                     
-                    var newVersionFolder = Path.Combine(service.Versions, version);
-                    MoveAllFilesInFolder(service.Published, newVersionFolder);
-                    CreateSymlink(Path.Combine(service.Current, "public"), newVersionFolder);
+                    var version = GetNextVersion(service.VersionDirectory);
+                    CreateFolder(service.VersionDirectory, version);
+                        
+                    var newVersionFolder = Path.Combine(service.VersionDirectory, version);
+                    MoveAllFilesInFolder(service.PublishedDirectory, newVersionFolder);
+                    CreateSymlink(Path.Combine(service.CurrentDirectory, "public"), newVersionFolder);
                 }
             }
 
@@ -63,7 +66,6 @@ public class Worker : BackgroundService
             Directory.Move(file, Path.Combine(from, to, name));
         }
     }
-    
     
     private void CreateFolder(string filePath, string name)
     {
