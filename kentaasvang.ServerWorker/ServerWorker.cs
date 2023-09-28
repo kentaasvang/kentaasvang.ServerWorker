@@ -15,26 +15,25 @@ public class Worker : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-            
-            if (_settings.Services != null)
-            {
-                foreach (var service in _settings.Services)
-                {
-                    var newVersionIsPublished = !IsDirectoryEmpty(service.PublishedDirectory);
-                    if (!newVersionIsPublished) 
-                        continue;
-                    
-                    var version = GetNextVersion(service.VersionDirectory);
-                    CreateFolder(service.VersionDirectory, version);
-                        
-                    var newVersionFolder = Path.Combine(service.VersionDirectory, version);
-                    MoveAllFilesInFolder(service.PublishedDirectory, newVersionFolder);
-                    CreateSymlink(Path.Combine(service.CurrentDirectory, "public"), newVersionFolder);
-                }
-            }
-
             await Task.Delay(_settings.DelayInMilliSeconds, stoppingToken);
+            _logger.LogInformation("Starting Worker at: {time:yy-mm-dd hh:mm:ss}", DateTime.UtcNow);
+
+            if (_settings.Services == null) continue;
+            
+            foreach (var service in _settings.Services)
+            {
+                _logger.LogInformation("Updating service: {service}", service.Name);
+                var newVersionIsPublished = !IsDirectoryEmpty(service.PublishedDirectory);
+                if (!newVersionIsPublished) 
+                    continue;
+                    
+                var version = GetNextVersion(service.VersionDirectory);
+                CreateFolder(service.VersionDirectory, version);
+                        
+                var newVersionFolder = Path.Combine(service.VersionDirectory, version);
+                MoveAllFilesInFolder(service.PublishedDirectory, newVersionFolder);
+                CreateSymlink(Path.Combine(service.CurrentDirectory, "public"), newVersionFolder);
+            }
         }
     }
 
