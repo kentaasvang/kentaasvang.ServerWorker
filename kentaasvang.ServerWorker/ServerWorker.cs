@@ -1,11 +1,11 @@
 namespace kentaasvang.ServerWorker;
 
-public class Worker : BackgroundService
+public class ServerWorker : BackgroundService
 {
-    private readonly ILogger<Worker> _logger;
+    private readonly ILogger<ServerWorker> _logger;
     private readonly WorkerSettings _settings;
 
-    public Worker(ILogger<Worker> logger, IConfiguration configuration)
+    public ServerWorker(ILogger<ServerWorker> logger, IConfiguration configuration)
     {
         _logger = logger;
         _settings = LoadSettings(configuration);
@@ -23,16 +23,16 @@ public class Worker : BackgroundService
             foreach (var service in _settings.Services)
             {
                 _logger.LogInformation("Updating service: {service}", service.Name);
-                var newVersionIsPublished = !IsDirectoryEmpty(service.PublishedDirectory);
+                var newVersionIsPublished = !IsDirectoryEmpty(service.Published);
                 if (!newVersionIsPublished) 
                     continue;
                     
-                var version = GetNextVersion(service.VersionDirectory);
-                CreateFolder(service.VersionDirectory, version);
+                var version = GetNextVersion(service.Versions);
+                CreateFolder(service.Versions, version);
                         
-                var newVersionFolder = Path.Combine(service.VersionDirectory, version);
-                MoveAllFilesInFolder(service.PublishedDirectory, newVersionFolder);
-                CreateSymlink(Path.Combine(service.CurrentDirectory, "public"), newVersionFolder);
+                var newVersionFolder = Path.Combine(service.Versions, version);
+                MoveAllFilesInFolder(service.Published, newVersionFolder);
+                CreateSymlink(Path.Combine(service.Current, "public"), newVersionFolder);
             }
         }
     }
@@ -40,7 +40,7 @@ public class Worker : BackgroundService
     private static WorkerSettings LoadSettings(IConfiguration configuration)
     {
         WorkerSettings settings = new();
-        configuration.GetSection(WorkerSettings.Name).Bind(settings);
+        configuration.GetSection(nameof(WorkerSettings)).Bind(settings);
         return settings;
     }
 

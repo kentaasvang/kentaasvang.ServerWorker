@@ -1,9 +1,12 @@
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+
 namespace kentaasvang.ServerWorker;
 
+// TODO: create validation for this class
 public class WorkerSettings
 {
-    public const string Name = nameof(WorkerSettings);
-    public List<Service>? Services { get; set; } = new();
-    public int DelayInMilliSeconds { get; set; } = 0;
-    public string StartVersion { get; set; } = string.Empty;
+    public List<Service>? Services { get; set; }
+    public int DelayInMilliSeconds { get; set; }
+    public string StartVersion { get; set; }
 }
