@@ -21,8 +21,11 @@ def _check_and_deploy_files(service):
 
 def main():
     from utils import read_service_file
+    from pathlib import Path
 
-    services = read_service_file("services.yaml") 
+    cwd = Path().cwd()
+    service_yaml_path = cwd / "services.yaml"
+    services = read_service_file(service_yaml_path) 
 
     while True:
         time.sleep(60)
