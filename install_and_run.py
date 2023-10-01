@@ -9,12 +9,15 @@ if (systemd_exist):
     exit(0)
 
 # add systemd-file
+# TODO: User should be fixed automatically
 cwd = Path().cwd()
 main = cwd / "main.py"
 systemd_file_content = f"""[Unit]
 Description=My server worker
 After=multi-user.target
+
 [Service]
+User=admin
 Type=simple
 Restart=always
 WorkingDirectory={cwd}
