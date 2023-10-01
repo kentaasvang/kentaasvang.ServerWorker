@@ -35,23 +35,9 @@ class TestCheckAndDeploy(unittest.TestCase):
 
         self.assertTrue(os.path.exists(moved_file), "File does not exist")
 
-
-class TestOldFilesAreRemoved(unittest.TestCase):
-
-    def setUp(self):
-        self.tmp_publish_dir = tempfile.mkdtemp(prefix="publish_") 
-        self.tmp_public_dir = tempfile.mkdtemp(prefix="public_") 
-        self.tmp_published_file = tempfile.mkstemp(dir=self.tmp_publish_dir, prefix="published_")
-        self.tmp_remove_file = tempfile.mkstemp(dir=self.tmp_public_dir, prefix="remove_")
-
-    def tearDown(self):
-        if os.path.exists(self.tmp_publish_dir):
-            shutil.rmtree(self.tmp_publish_dir)
-
-        if os.path.exists(self.tmp_public_dir):
-            shutil.rmtree(self.tmp_public_dir)
-
     def test_check_old_files_are_removed(self):
+        
+        self.tmp_remove_file = tempfile.mkstemp(dir=self.tmp_public_dir, prefix="remove_")
 
         test_service = { 
             "name": "My Test Service",
@@ -64,7 +50,7 @@ class TestOldFilesAreRemoved(unittest.TestCase):
         tmp_removed_file_name = os.path.basename(self.tmp_remove_file[1])
         removed_file = os.path.join(self.tmp_public_dir, tmp_removed_file_name)
 
-        self.assertFalse(os.path.exists(removed_file), "File does not exist")
+        self.assertFalse(os.path.exists(removed_file), "File should be removed")
 
 
 class TestLoadServiceYaml(unittest.TestCase):

@@ -11,6 +11,7 @@ def _check_and_deploy_files(service):
     published_files = list(publish_dir.iterdir())
         
     if any(published_files):
+
         for old_file in public_dir.iterdir():
             os.remove(old_file)
 
