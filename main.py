@@ -1,8 +1,12 @@
 import os
+import sys
 import time
 import shutil
 from pathlib import Path 
 
+if sys.version_info.minor < 10:
+    print("python version >= 3.10 is required")
+    exit()
 
 def _check_and_deploy_files(service):
 

@@ -1,4 +1,3 @@
-# TODO: if python3.10, import yaml won't work
 import yaml
 
 def read_service_file(config_path):
