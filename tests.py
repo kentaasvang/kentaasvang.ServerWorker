@@ -1,7 +1,13 @@
 import os
-import shutil
 import tempfile
 import unittest
+import shutil
+
+# disable for tests
+import logging
+logging.disable()
+import logging
+
 
 from main import _check_and_deploy_files
 from utils import read_service_file
