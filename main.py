@@ -46,9 +46,12 @@ def main():
         logging.info(f"Waiting for {delay_in_secs} seconds")
         time.sleep(delay_in_secs)
 
-        for service in services:
-            logging.info(f"Deploying files for {service['name']}")
-            _check_and_deploy_files(service)
+        try:
+            for service in services:
+                logging.info(f"Deploying files for {service['name']}")
+                _check_and_deploy_files(service)
+        except Exception as e:
+            logging.error(e)
 
 
 if __name__ == "__main__":
