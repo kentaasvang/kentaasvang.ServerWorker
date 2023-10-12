@@ -77,7 +77,7 @@ class TestCheckAndDeploy(unittest.TestCase):
 
     def test_check_dotfolders_are_ignored(self):
         
-        self.tmp_remove_file = tempfile.mkdtemp(dir=self.tmp_publish_dir, prefix=".")
+        self.tmp_remove_folder = tempfile.mkdtemp(dir=self.tmp_publish_dir, prefix=".")
 
         test_service = { 
             "name": "My Test Service",
@@ -87,7 +87,7 @@ class TestCheckAndDeploy(unittest.TestCase):
 
         _check_and_deploy_files(test_service)
 
-        tmp_removed_file_name = os.path.basename(self.tmp_remove_file[1])
+        tmp_removed_file_name = os.path.basename(self.tmp_remove_folder)
         removed_file = os.path.join(self.tmp_publish_dir, tmp_removed_file_name)
 
         self.assertTrue(os.path.exists(removed_file), "Dotfolders should be ignored")
