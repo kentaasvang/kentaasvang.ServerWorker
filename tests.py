@@ -61,6 +61,7 @@ class TestCheckAndDeploy(unittest.TestCase):
     def test_check_dotfiles_are_ignored(self):
         
         self.tmp_remove_file = tempfile.mkstemp(dir=self.tmp_publish_dir, prefix=".")
+        self.tmp_existing_dotfile = tempfile.mkstemp(dir=self.tmp_public_dir, prefix=".")
 
         test_service = { 
             "name": "My Test Service",
@@ -73,7 +74,11 @@ class TestCheckAndDeploy(unittest.TestCase):
         tmp_removed_file_name = os.path.basename(self.tmp_remove_file[1])
         removed_file = os.path.join(self.tmp_publish_dir, tmp_removed_file_name)
 
+        tmp_existing_dotfile_name = os.path.basename(self.tmp_existing_dotfile[1])
+        existing_dot_file = os.path.join(self.tmp_public_dir, tmp_existing_dotfile_name)
+
         self.assertTrue(os.path.exists(removed_file), "Dotfiles should be ignored")
+        self.assertTrue(os.path.exists(existing_dot_file), "Dotfiles should be ignored")
 
     def test_check_dotfolders_are_ignored(self):
         
@@ -132,4 +137,4 @@ class TestLoadServiceYaml(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    unittest.main(verbosity=1)
