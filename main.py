@@ -16,11 +16,15 @@ def _check_and_deploy_files(service):
     if any(published_files):
 
         for old_file in public_dir.iterdir():
+            if old_file.name.startswith("."):
+                logging.info(f"Skipping file '{old_file}'")
+                continue
             logging.info(f"Removing file '{old_file}'")
             os.remove(old_file)
 
         for file in published_files:
             if file.name.startswith("."):
+                logging.info(f"Skipping '{file}' info '{public_dir}'")
                 continue
             logging.info(f"Moving '{file}' info '{public_dir}'")
             shutil.move(file, public_dir)
