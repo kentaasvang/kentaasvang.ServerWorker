@@ -2,30 +2,31 @@ import os
 import logging
 import time
 import shutil
+from typing import List
 from pathlib import Path 
 
 logging.basicConfig(level=logging.INFO)
 
+def _valid(file: Path) -> bool:
+    return file.name.startswith(".") == False
+
+def _get_validated_files(path: Path) -> List[Path]:
+    return [f for f in path.iterdir() if _valid(f)]
 
 def _check_and_deploy_files(service):
 
     publish_dir = Path(service["publish"]) 
     public_dir = Path(service["public"])
-    published_files = list(publish_dir.iterdir())
+    published_files = _get_validated_files(publish_dir)
+    public_files = _get_validated_files(public_dir) 
         
     if any(published_files):
 
-        for old_file in public_dir.iterdir():
-            if old_file.name.startswith("."):
-                logging.info(f"Skipping file '{old_file}'")
-                continue
+        for old_file in public_files:
             logging.info(f"Removing file '{old_file}'")
             os.remove(old_file)
 
         for file in published_files:
-            if file.name.startswith("."):
-                logging.info(f"Skipping '{file}' info '{public_dir}'")
-                continue
             logging.info(f"Moving '{file}' info '{public_dir}'")
             shutil.move(file, public_dir)
 
