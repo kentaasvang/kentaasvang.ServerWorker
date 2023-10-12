@@ -17,16 +17,23 @@ def _check_and_deploy_files(service):
 
     publish_dir = Path(service["publish"]) 
     public_dir = Path(service["public"])
-    published_files = _get_validated_files(publish_dir)
-    public_files = _get_validated_files(public_dir) 
+    published_items = _get_validated_files(publish_dir)
+    public_items = _get_validated_files(public_dir) 
         
-    if any(published_files):
+    if any(published_items):
 
-        for old_file in public_files:
-            logging.info(f"Removing file '{old_file}'")
-            os.remove(old_file)
+        logging.info(f"Deploying files for {service['name']}")
 
-        for file in published_files:
+        for old_item in public_items:
+            if old_item.is_dir():
+                logging.info(f"Removing folder '{old_item}'")
+                shutil.rmtree(old_item)
+            
+            if old_item.is_file():
+                logging.info(f"Removing file '{old_item}'")
+                os.remove(old_item)
+
+        for file in published_items:
             logging.info(f"Moving '{file}' info '{public_dir}'")
             shutil.move(file, public_dir)
 
@@ -48,7 +55,6 @@ def main():
 
         try:
             for service in services:
-                logging.info(f"Deploying files for {service['name']}")
                 _check_and_deploy_files(service)
         except Exception as e:
             logging.error(e)
