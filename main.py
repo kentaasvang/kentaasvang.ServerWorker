@@ -20,6 +20,8 @@ def _check_and_deploy_files(service):
             os.remove(old_file)
 
         for file in published_files:
+            if file.name.startswith("."):
+                continue
             logging.info(f"Moving '{file}' info '{public_dir}'")
             shutil.move(file, public_dir)
 
