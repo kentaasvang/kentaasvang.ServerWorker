@@ -121,10 +121,15 @@ class TestLoadServiceYaml(unittest.TestCase):
   - name: "My first service" 
     publish_dir: "my publish dir"
     public_dir: "my public dir"
+    ignore:
+      - "appsettings.json"
+      - "node_modules"
 
   - name: "My second service" 
     publish_dir: "my second publish dir"
     public_dir: "my second public dir"
+    ignore:
+      - "venv"
 """)
 
     def tearDown(self):
@@ -138,12 +143,14 @@ class TestLoadServiceYaml(unittest.TestCase):
             {
                 "name": "My first service",
                 "publish_dir": "my publish dir",
-                "public_dir": "my public dir"
+                "public_dir": "my public dir",
+                "ignore": ["appsettings.json", "node_modules"]
             },
             {
                 "name": "My second service",
                 "publish_dir": "my second publish dir",
-                "public_dir": "my second public dir"
+                "public_dir": "my second public dir",
+                "ignore": ["venv"]
             }
         ]
 
