@@ -130,6 +130,10 @@ class TestLoadServiceYaml(unittest.TestCase):
     public_dir: "my second public dir"
     ignore:
       - "venv"
+
+  - name: "My third service" 
+    publish_dir: "my third publish dir"
+    public_dir: "my third public dir"
 """)
 
     def tearDown(self):
@@ -151,6 +155,11 @@ class TestLoadServiceYaml(unittest.TestCase):
                 "publish_dir": "my second publish dir",
                 "public_dir": "my second public dir",
                 "ignore": ["venv"]
+            },
+            {
+                "name": "My third service",
+                "publish_dir": "my third publish dir",
+                "public_dir": "my third public dir"
             }
         ]
 
