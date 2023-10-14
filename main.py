@@ -7,18 +7,20 @@ from pathlib import Path
 
 logging.basicConfig(level=logging.INFO)
 
-def _valid(file: Path) -> bool:
-    return file.name.startswith(".") == False
+def _get_validated_files(path: Path, ignored_files=None) -> List[Path]:
+    if not ignored_files:
+        return list(path.iterdir())
 
-def _get_validated_files(path: Path) -> List[Path]:
-    return [f for f in path.iterdir() if _valid(f)]
+    return [f for f in path.iterdir() if os.path.basename(f) not in ignored_files]
 
-def _check_and_deploy_files(service):
+def _check_and_deploy_files(service: dict):
 
+    ignored_files: List[str] | None = service.get("ignore")
     publish_dir = Path(service["publish"]) 
     public_dir = Path(service["public"])
-    published_items = _get_validated_files(publish_dir)
-    public_items = _get_validated_files(public_dir) 
+
+    published_items = _get_validated_files(publish_dir, ignored_files=ignored_files)
+    public_items = _get_validated_files(public_dir, ignored_files=ignored_files) 
         
     if any(published_items):
 
